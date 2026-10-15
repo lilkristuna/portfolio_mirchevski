@@ -1,0 +1,52 @@
+- id: "mpi_flood_critical"
+  name: "Critical MPI Flood Protection"
+  conditions:
+    threat_type: ["mpi_flood"]
+    severity: "critical"
+    metrics:
+      packets_sent:
+        min: 500000
+      bytes_sent:
+        min: 100000000
+  actions: ["suspend_job", "isolate_node"]
+  severity: "critical"
+  enabled: true
+  auto_execute: true
+
+- id: "mpi_flood_high"
+  name: "High MPI Flood Protection"
+  conditions:
+    threat_type: ["mpi_flood"]
+    severity: "high"
+    metrics:
+      packets_sent:
+        min: 100000
+      bytes_sent:
+        min: 50000000
+  actions: ["suspend_job"]
+  severity: "high"
+  enabled: true
+  auto_execute: true
+
+- id: "traffic_imbalance"
+  name: "Traffic Imbalance Protection"
+  conditions:
+    threat_type: ["traffic_imbalance"]
+    severity: "medium"
+    metrics:
+      ratio:
+        min: 100
+  actions: ["throttle_traffic"]
+  severity: "medium"
+  enabled: true
+  auto_execute: true
+
+- id: "custom_job_protection"
+  name: "Custom Job Protection"
+  conditions:
+    threat_type: ["custom"]
+    severity: "high"
+  actions: ["manual_review"]
+  severity: "high"
+  enabled: true
+  auto_execute: false

@@ -1,0 +1,514 @@
+{
+  "dashboard": {
+    "title": "Supercomputer Monitoring Dashboard",
+    "tags": ["supercomputer", "monitoring"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Network Metrics Collected",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(network_metrics_collected_total[1m])",
+            "legendFormat": "Metrics Collected/sec",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Metrics/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 2,
+        "title": "Nodes Monitored",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(nodes_monitored_total[1m])",
+            "legendFormat": "Nodes/sec",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Nodes/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 3,
+        "title": "Kafka Send Status",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(kafka_send_success_total[1m])",
+            "legendFormat": "Kafka Send Success",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(kafka_send_failures_total[1m])",
+            "legendFormat": "Kafka Send Failures",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Events/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 4,
+        "title": "Connection Recovery",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(connection_recovery_success_total[1m])",
+            "legendFormat": "Recovery Success",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(connection_recovery_failures_total[1m])",
+            "legendFormat": "Recovery Failures",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Recoveries/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 5,
+        "title": "High Load Processing",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "rate(high_load_processed_total[1m])",
+            "legendFormat": "Processed",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(high_load_dropped_total[1m])",
+            "legendFormat": "Dropped",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Packets/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 6,
+        "title": "MPI Flood Detection",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+        "targets": [
+          {
+            "expr": "rate(mpi_flood_detected_total[1m])",
+            "legendFormat": "MPI Flood Detected",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(detection_failures_total[1m])",
+            "legendFormat": "Detection Failures",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Detections/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 7,
+        "title": "False Positives & Normal Traffic",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+        "targets": [
+          {
+            "expr": "rate(false_positive_total[1m])",
+            "legendFormat": "False Positives",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(normal_traffic_processed_total[1m])",
+            "legendFormat": "Normal Traffic",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Events/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 8,
+        "title": "ML Inference",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+        "targets": [
+          {
+            "expr": "rate(ml_inference_success_total[1m])",
+            "legendFormat": "ML Success",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(ml_inference_failures_total[1m])",
+            "legendFormat": "ML Failures",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Inferences/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 9,
+        "title": "Processing Timeout",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32},
+        "targets": [
+          {
+            "expr": "rate(processing_timeout_total[1m])",
+            "legendFormat": "Timeouts",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(analysis_completed_total[1m])",
+            "legendFormat": "Completed",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Events/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 10,
+        "title": "Rate Limiting",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 32},
+        "targets": [
+          {
+            "expr": "rate(rate_limit_exceeded_total[1m])",
+            "legendFormat": "Limit Exceeded",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(rate_limit_ok_total[1m])",
+            "legendFormat": "Within Limit",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Events/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 11,
+        "title": "Policies Loaded",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 40},
+        "targets": [
+          {
+            "expr": "policies_loaded_total",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {},
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 1, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 12,
+        "title": "Policy Matching",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 6, "y": 40},
+        "targets": [
+          {
+            "expr": "rate(policy_matching_success_total[1m])",
+            "legendFormat": "Matching Success",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(policy_matching_failures_total[1m])",
+            "legendFormat": "Matching Failures",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Matches/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 13,
+        "title": "Dynamic Updates",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 18, "y": 40},
+        "targets": [
+          {
+            "expr": "rate(dynamic_updates_applied_total[1m])",
+            "legendFormat": "Updates Applied",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(dynamic_update_failures_total[1m])",
+            "legendFormat": "Update Failures",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Updates/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 14,
+        "title": "Access Control",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 48},
+        "targets": [
+          {
+            "expr": "rate(authorized_access_total[1m])",
+            "legendFormat": "Authorized",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(access_denied_total[1m])",
+            "legendFormat": "Access Denied",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Access Attempts/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 15,
+        "title": "Elasticsearch Indexing",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 48},
+        "targets": [
+          {
+            "expr": "rate(elasticsearch_index_success_total[1m])",
+            "legendFormat": "Index Success",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(elasticsearch_index_failures_total[1m])",
+            "legendFormat": "Index Failures",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Indexes/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 16,
+        "title": "Logs Enriched",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 56},
+        "targets": [
+          {
+            "expr": "rate(logs_enriched_total[1m])",
+            "legendFormat": "Logs Enriched/sec",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Logs/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 17,
+        "title": "API Search",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 56},
+        "targets": [
+          {
+            "expr": "rate(api_search_success_total[1m])",
+            "legendFormat": "Search Success",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(api_search_failures_total[1m])",
+            "legendFormat": "Search Failures",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(api_response_timeout_total[1m])",
+            "legendFormat": "Response Timeout",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Requests/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 18,
+        "title": "High Throughput",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 64},
+        "targets": [
+          {
+            "expr": "rate(high_throughput_processed_total[1m])",
+            "legendFormat": "High Throughput",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(low_throughput_total[1m])",
+            "legendFormat": "Low Throughput",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Events/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 19,
+        "title": "Index Rotation",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 64},
+        "targets": [
+          {
+            "expr": "rate(index_rotation_success_total[1m])",
+            "legendFormat": "Rotation Success",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(index_rotation_failures_total[1m])",
+            "legendFormat": "Rotation Failures",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Rotations/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 20,
+        "title": "Service Health Status",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 40},
+        "targets": [
+          {
+            "expr": "up{job=\"traffic-monitor-service\"}",
+            "legendFormat": "Traffic Monitor",
+            "refId": "A"
+          },
+          {
+            "expr": "up{job=\"security-analyzer-service\"}",
+            "legendFormat": "Security Analyzer",
+            "refId": "B"
+          },
+          {
+            "expr": "up{job=\"policy-manager-service\"}",
+            "legendFormat": "Policy Manager",
+            "refId": "C"
+          },
+          {
+            "expr": "up{job=\"audit-logging-service\"}",
+            "legendFormat": "Audit Logging",
+            "refId": "D"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "mappings": [
+              {"options": {"0": {"text": "DOWN", "color": "red"}, "1": {"text": "UP", "color": "green"}}, "type": "value"}
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "red"},
+                {"value": 1, "color": "green"}
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "time": {
+      "from": "now-15m",
+      "to": "now"
+    },
+    "timepicker": {}
+  }
+}

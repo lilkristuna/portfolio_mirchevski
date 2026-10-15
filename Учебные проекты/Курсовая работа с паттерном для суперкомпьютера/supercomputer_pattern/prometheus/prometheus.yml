@@ -1,0 +1,38 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'traffic-monitor-service'
+    static_configs:
+      - targets: ['traffic-monitor-service:8001']
+
+  - job_name: 'security-analyzer-service'
+    static_configs:
+      - targets: ['security-analyzer-service:8003']
+
+  - job_name: 'policy-manager-service'
+    static_configs:
+      - targets: ['policy-manager-service:8001']
+
+  - job_name: 'audit-logging-service'
+    static_configs:
+      - targets: ['audit-logging-service:8001']
+
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka:9092']
+    metrics_path: /metrics
+
+  - job_name: 'elasticsearch'
+    static_configs:
+      - targets: ['elasticsearch:9200']
+    metrics_path: /_prometheus/metrics
+
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']

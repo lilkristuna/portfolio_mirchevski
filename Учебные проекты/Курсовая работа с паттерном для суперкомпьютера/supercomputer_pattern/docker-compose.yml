@@ -1,0 +1,250 @@
+version: '3.8'
+
+services:
+  # Zookeeper для Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - supercomputer-net
+    restart: unless-stopped
+
+  # Kafka broker
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9093
+    networks:
+      - supercomputer-net
+    restart: unless-stopped
+
+  # Elasticsearch для логирования
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.7.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - xpack.security.enabled=false
+      - xpack.monitoring.enabled=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - supercomputer-net
+    restart: unless-stopped
+
+  # Node Exporter для сбора системных метрик
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - supercomputer-net
+    restart: unless-stopped
+
+  # Prometheus для сбора метрик
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - supercomputer-net
+    restart: unless-stopped
+
+  # Grafana для визуализации
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - supercomputer-net
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+      - elasticsearch
+
+  # Traffic Monitor Service
+  traffic-monitor-service:
+    build:
+      context: ./traffic-monitor-service
+      dockerfile: Dockerfile
+    container_name: traffic-monitor-service
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    environment:
+      - NODE_NAME=simulated-node-1
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - KAFKA_TOPIC=mpi-traffic-metrics
+    networks:
+      - supercomputer-net
+    restart: unless-stopped
+    depends_on:
+      - kafka
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+    volumes:
+      - traffic_monitor_data:/app/data
+
+  # Security Analyzer Service
+  security-analyzer-service:
+    build:
+      context: ./security-analyzer-service
+      dockerfile: Dockerfile
+    container_name: security-analyzer-service
+    ports:
+      - "8002:8002"
+      - "8003:8003"
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - INPUT_TOPIC=mpi-traffic-metrics
+      - OUTPUT_TOPIC=security-incidents
+      - POLICY_MANAGER_URL=http://policy-manager-service:8000
+      - SLURM_CONTROLLER_URL=http://fake-slurm-controller:8000
+      - SDN_CONTROLLER_URL=http://fake-sdn-controller:8000
+    networks:
+      - supercomputer-net
+    restart: unless-stopped
+    depends_on:
+      - kafka
+      - policy-manager-service
+    volumes:
+      - security_analyzer_data:/app/data
+
+  # Policy Manager Service
+  policy-manager-service:
+    build:
+      context: .
+      dockerfile: ./policy-manager-service/Dockerfile              
+    container_name: policy-manager-service
+    ports:
+      - "8004:8000"
+      - "8005:8001"
+    environment:
+      - POLICIES_DIR=/app/policies
+      - DEFAULT_POLICY_PATH=/app/policies/default_policies.yaml
+    volumes:
+      - ./policies:/app/policies
+      - policy_manager_data:/app/data
+    networks:
+      - supercomputer-net
+    restart: unless-stopped
+
+  # Audit & Logging Service
+  audit-logging-service:
+    build:
+      context: ./audit-logging-service
+      dockerfile: Dockerfile
+    container_name: audit-logging-service
+    ports:
+      - "8006:8000"
+      - "8007:8001"
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - KAFKA_TOPICS=mpi-traffic-metrics,security-incidents,countermeasure-results
+      - ELASTICSEARCH_HOSTS=elasticsearch:9200
+      - INDEX_PREFIX=security-logs
+    networks:
+      - supercomputer-net
+    restart: unless-stopped
+    depends_on:
+      - kafka
+      - elasticsearch
+    volumes:
+      - audit_logging_data:/app/data
+
+  # Фейковые сервисы для интеграции (для демонстрации)
+  fake-slurm-controller:
+    image: httpd:2.4
+    container_name: fake-slurm-controller
+    ports:
+      - "8080:80"
+    networks:
+      - supercomputer-net
+    restart: unless-stopped
+
+  fake-sdn-controller:
+    image: httpd:2.4
+    container_name: fake-sdn-controller
+    ports:
+      - "8081:80"
+    networks:
+      - supercomputer-net
+    restart: unless-stopped
+
+networks:
+  supercomputer-net:
+    driver: bridge
+
+volumes:
+  es_data:
+    name: supercomputer_elasticsearch_data
+    driver: local
+  
+  prometheus_data:
+    name: supercomputer_prometheus_data
+    driver: local
+  
+  grafana_data:
+    name: supercomputer_grafana_data
+    driver: local
+  
+  traffic_monitor_data:
+    name: supercomputer_traffic_monitor_data
+    driver: local
+  
+  security_analyzer_data:
+    name: supercomputer_security_analyzer_data
+    driver: local
+  
+  policy_manager_data:
+    name: supercomputer_policy_manager_data
+    driver: local
+  
+  audit_logging_data:
+    name: supercomputer_audit_logging_data
+    driver: local
